@@ -1,0 +1,512 @@
+QUESTION=>A permutation perm of n + 1 integers of all the integers in the range [0, n] can be represented as a string s of length n where:
+
+- s[i] == 'I' if perm[i] < perm[i + 1], and
+- s[i] == 'D' if perm[i] > perm[i + 1].
+
+Given a string s, reconstruct the permutation perm and return it. If there are multiple valid permutations perm, return **any of them**.
+
+SOLUTION=>
+
+#include <iostream>
+#include <vector>
+#include <string>
+
+std::vector<int> reconstructPermutation(std::string s) {
+    std::vector<int> perm(s.length() + 1);
+    int low = 0;
+    int high = s.length();
+
+    for (int i = 0; i < s.length(); i++) {
+        if (s[i] == 'I') {
+            perm[i] = high;
+            high--;
+        } else if (s[i] == 'D') {
+            perm[i] = low;
+            low++;
+        }
+    }
+
+    perm[s.length()] = low;
+
+    return perm;
+}
+
+int main() {
+    std::string s;
+    std::cout << "Enter the string representation of the permutation (consisting of 'I' and 'D'): ";
+    std::cin >> s;
+
+    std::vector<int> perm = reconstructPermutation(s);
+
+    std::cout << "Reconstructed permutation: ";
+    for (int num : perm) {
+        std::cout << num << " ";
+    }
+    std::cout << std::endl;
+
+    return 0;
+}
+
+
+Input: s = "IDID"
+Output:[0,4,1,3,2]
+
+################################################################################################################################################
+QUESTION=>  You are given an m x n integer matrix matrix with the following two properties:
+
+- Each row is sorted in non-decreasing order.
+- The first integer of each row is greater than the last integer of the previous row.
+
+Given an integer target, return true *if* target *is in* matrix *or* false *otherwise*.
+
+You must write a solution in O(log(m * n)) time complexity.
+
+SOLUTION=>
+
+#include <iostream>
+#include <vector>
+
+bool searchMatrix(std::vector<std::vector<int>>& matrix, int target) {
+    int m = matrix.size();
+    int n = matrix[0].size();
+
+    int left = 0;
+    int right = m * n - 1;
+
+    while (left <= right) {
+        int mid = (left + right) / 2;
+        int row = mid / n;
+        int col = mid % n;
+
+        if (matrix[row][col] == target) {
+            return true;
+        } else if (matrix[row][col] < target) {
+            left = mid + 1;
+        } else {
+            right = mid - 1;
+        }
+    }
+
+    return false;
+}
+
+int main() {
+    int m, n;
+    std::cout << "Enter the number of rows in the matrix: ";
+    std::cin >> m;
+    std::cout << "Enter the number of columns in the matrix: ";
+    std::cin >> n;
+
+    std::vector<std::vector<int>> matrix(m, std::vector<int>(n));
+    std::cout << "Enter the elements of the matrix in non-decreasing order:" << std::endl;
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++) {
+            std::cin >> matrix[i][j];
+        }
+    }
+
+    int target;
+    std::cout << "Enter the target number: ";
+    std::cin >> target;
+
+    bool found = searchMatrix(matrix, target);
+
+    std::cout << "Target " << target << (found ? " is" : " is not") << " in the matrix." << std::endl;
+
+    return 0;
+}
+
+
+Input:  matrix = [[1,3,5,7],[10,11,16,20],[23,30,34,60]], target = 3
+Output:  true
+
+################################################################################################################################################
+QUESTION=> 
+Given an array of integers arr, return *true if and only if it is a valid mountain array*.
+
+Recall that arr is a mountain array if and only if:
+
+- arr.length >= 3
+- There exists some i with 0 < i < arr.length - 1 such that:
+    - arr[0] < arr[1] < ... < arr[i - 1] < arr[i]
+    - arr[i] > arr[i + 1] > ... > arr[arr.length - 1]
+
+
+SOLUTION=>
+
+#include <iostream>
+#include <vector>
+
+bool validMountainArray(std::vector<int>& arr) {
+    int n = arr.size();
+    
+    if (n < 3) {
+        return false;
+    }
+    
+    int i = 0;
+    while (i + 1 < n && arr[i] < arr[i + 1]) {
+        i++;
+    }
+    
+    if (i == 0 || i == n - 1) {
+        return false;
+    }
+    
+    while (i + 1 < n && arr[i] > arr[i + 1]) {
+        i++;
+    }
+    
+    return i == n - 1;
+}
+
+int main() {
+    int n;
+    std::cout << "Enter the size of the array: ";
+    std::cin >> n;
+    
+    std::vector<int> arr(n);
+    std::cout << "Enter the elements of the array: ";
+    for (int i = 0; i < n; i++) {
+        std::cin >> arr[i];
+    }
+    
+    bool isValidMountain = validMountainArray(arr);
+    std::cout << "The array is " << (isValidMountain ? "a valid mountain array" : "not a valid mountain array") << std::endl;
+    
+    return 0;
+}
+
+
+Input: arr = [2,1]
+Output: false
+
+################################################################################################################################################
+QUESTION=>Given a binary array nums, return the maximum length of a contiguous subarray with an equal number of 0 and 1.
+
+SOLUTION=>
+
+#include <iostream>
+#include <vector>
+#include <unordered_map>
+
+int findMaxLength(std::vector<int>& nums) {
+    int maxLength = 0;
+    int count = 0;
+    int maxCount = 0;
+    
+    std::unordered_map<int, int> countMap;
+    countMap[0] = -1; // Initialize with an imaginary index -1
+    
+    for (int i = 0; i < nums.size(); i++) {
+        count += (nums[i] == 1) ? 1 : -1;
+        
+        if (countMap.count(count)) {
+            maxLength = std::max(maxLength, i - countMap[count]);
+        } else {
+            countMap[count] = i;
+        }
+        
+        maxCount = std::max(maxCount, count);
+    }
+    
+    return maxLength;
+}
+
+int main() {
+    int n;
+    std::cout << "Enter the size of the array: ";
+    std::cin >> n;
+    
+    std::vector<int> nums(n);
+    std::cout << "Enter the elements of the array (0 or 1): ";
+    for (int i = 0; i < n; i++) {
+        std::cin >> nums[i];
+    }
+    
+    int maxLength = findMaxLength(nums);
+    std::cout << "Maximum length of contiguous subarray with equal number of 0s and 1s: " << maxLength << std::endl;
+    
+    return 0;
+}
+
+
+Input:  nums[0,1]
+Output:  2
+
+################################################################################################################################################
+QUESTION=>  The **product sum** of two equal-length arrays a and b is equal to the sum of a[i] * b[i] for all 0 <= i < a.length (**0-indexed**).
+
+- For example, if a = [1,2,3,4] and b = [5,2,3,1], the **product sum** would be 1*5 + 2*2 + 3*3 + 4*1 = 22.
+
+Given two arrays nums1 and nums2 of length n, return *the **minimum product sum** if you are allowed to **rearrange** the **order** of the elements in* nums1.
+
+SOLUTION=>
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+int minProductSum(std::vector<int>& nums1, std::vector<int>& nums2) {
+    std::sort(nums1.begin(), nums1.end());
+    std::sort(nums2.begin(), nums2.end(), std::greater<int>());
+    
+    int left = 0;
+    int right = nums2.size() - 1;
+    int minProductSum = 0;
+    
+    while (left <= right) {
+        minProductSum += nums1[left] * nums2[right];
+        left++;
+        right--;
+    }
+    
+    return minProductSum;
+}
+
+int main() {
+    int n;
+    std::cout << "Enter the size of the arrays: ";
+    std::cin >> n;
+    
+    std::vector<int> nums1(n);
+    std::vector<int> nums2(n);
+    
+    std::cout << "Enter the elements of nums1: ";
+    for (int i = 0; i < n; i++) {
+        std::cin >> nums1[i];
+    }
+    
+    std::cout << "Enter the elements of nums2: ";
+    for (int i = 0; i < n; i++) {
+        std::cin >> nums2[i];
+    }
+    
+    int minProduct = minProductSum(nums1, nums2);
+    std::cout << "Minimum product sum: " << minProduct << std::endl;
+    
+    return 0;
+}
+
+
+
+Input: nums1 = [5,3,4,2], nums2 = [4,2,2,5]
+Output:  40
+
+################################################################################################################################################
+QUESTION=> An integer array original is transformed into a **doubled** array changed by appending **twice the value** of every element in original, and then randomly **shuffling** the resulting array.
+
+Given an array changed, return original *if* changed *is a **doubled** array. If* changed *is not a **doubled** array, return an empty array. The elements in* original *may be returned in **any** order*.
+
+SOLUTION=>
+
+#include <iostream>
+#include <vector>
+#include <unordered_map>
+
+std::vector<int> retrieveOriginalArray(std::vector<int>& changed) {
+    std::unordered_map<int, int> freqMap;
+    
+    // Step 1: Count the occurrences of each element in 'changed'
+    for (int num : changed) {
+        freqMap[num]++;
+    }
+    
+    std::vector<int> original;
+    
+    // Step 2: Check if 'changed' is a doubled array and retrieve 'original'
+    for (int num : changed) {
+        if (freqMap[2 * num] == 0) {
+            return {}; // 'changed' is not a doubled array, return an empty array
+        }
+        freqMap[2 * num]--;
+    }
+    
+    // Step 3: Retrieve the 'original' array
+    for (int num : changed) {
+        if (freqMap[num] > 0) {
+            original.push_back(num);
+            freqMap[num]--;
+        }
+    }
+    
+    // Step 4: Check if the length of 'original' is correct
+    if (original.size() == changed.size() / 2) {
+        return original;
+    }
+    
+    return {}; // 'changed' is not a doubled array, return an empty array
+}
+
+int main() {
+    int n;
+    std::cout << "Enter the size of the array: ";
+    std::cin >> n;
+    
+    std::vector<int> changed(n * 2);
+    
+    std::cout << "Enter the elements of 'changed': ";
+    for (int i = 0; i < n * 2; i++) {
+        std::cin >> changed[i];
+    }
+    
+    std::vector<int> original = retrieveOriginalArray(changed);
+    
+    if (original.empty()) {
+        std::cout << "The 'changed' array is not a doubled array." << std::endl;
+    } else {
+        std::cout << "The 'original' array is: ";
+        for (int num : original) {
+            std::cout << num << " ";
+        }
+        std::cout << std::endl;
+    }
+    
+    return 0;
+}
+
+
+Input:  changed = [1,3,4,2,6,8]
+Output:  [1,3,4]
+
+################################################################################################################################################
+QUESTION=>  Given a positive integer n, generate an n x n matrix filled with elements from 1 to n2 in spiral order.
+
+SOLUTION=>
+
+#include <iostream>
+#include <vector>
+
+std::vector<std::vector<int>> generateMatrix(int n) {
+    std::vector<std::vector<int>> matrix(n, std::vector<int>(n, 0));
+    
+    int num = 1; // Starting number
+    int rowStart = 0;
+    int rowEnd = n - 1;
+    int colStart = 0;
+    int colEnd = n - 1;
+    
+    while (rowStart <= rowEnd && colStart <= colEnd) {
+        // Traverse right
+        for (int col = colStart; col <= colEnd; col++) {
+            matrix[rowStart][col] = num++;
+        }
+        rowStart++;
+        
+        // Traverse down
+        for (int row = rowStart; row <= rowEnd; row++) {
+            matrix[row][colEnd] = num++;
+        }
+        colEnd--;
+        
+        if (rowStart <= rowEnd) {
+            // Traverse left
+            for (int col = colEnd; col >= colStart; col--) {
+                matrix[rowEnd][col] = num++;
+            }
+            rowEnd--;
+        }
+        
+        if (colStart <= colEnd) {
+            // Traverse up
+            for (int row = rowEnd; row >= rowStart; row--) {
+                matrix[row][colStart] = num++;
+            }
+            colStart++;
+        }
+    }
+    
+    return matrix;
+}
+
+int main() {
+    int n;
+    std::cout << "Enter the value of n: ";
+    std::cin >> n;
+    
+    std::vector<std::vector<int>> matrix = generateMatrix(n);
+    
+    std::cout << "Generated matrix:" << std::endl;
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            std::cout << matrix[i][j] << " ";
+        }
+        std::cout << std::endl;
+    }
+    
+    return 0;
+}
+
+
+
+Input: n = 3
+Output:  [[1,2,3],[8,9,4],[7,6,5]]
+
+################################################################################################################################################
+QUESTION=>  Given two sparse matrices mat1 of size m x k and mat2 of size k x n, return the result of mat1 x mat2. You may assume that multiplication is always possible.
+
+SOLUTION=>
+
+#include <iostream>
+#include <vector>
+
+std::vector<std::vector<int>> multiplySparseMatrices(std::vector<std::vector<int>>& mat1, std::vector<std::vector<int>>& mat2) {
+    int m = mat1.size();    // Number of rows in mat1
+    int k = mat1[0].size(); // Number of columns in mat1
+    int n = mat2[0].size(); // Number of columns in mat2
+
+    // Convert mat1 to CSR format
+    std::vector<int> values1;
+    std::vector<int> rowPtr1(m + 1, 0);
+    std::vector<int> colIndex1;
+    int nnz1 = 0; // Number of non-zero elements in mat1
+
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < k; j++) {
+            if (mat1[i][j] != 0) {
+                values1.push_back(mat1[i][j]);
+                colIndex1.push_back(j);
+                nnz1++;
+            }
+        }
+        rowPtr1[i + 1] = nnz1;
+    }
+
+    // Multiply mat1 and mat2 in CSR format
+    std::vector<std::vector<int>> result(m, std::vector<int>(n, 0));
+
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++) {
+            int dotProduct = 0;
+            for (int idx = rowPtr1[i]; idx < rowPtr1[i + 1]; idx++) {
+                int col = colIndex1[idx];
+                dotProduct += values1[idx] * mat2[col][j];
+            }
+            result[i][j] = dotProduct;
+        }
+    }
+
+    return result;
+}
+
+int main() {
+    std::vector<std::vector<int>> mat1 = {{1, 0, 0}, {-1, 0, 3}};
+    std::vector<std::vector<int>> mat2 = {{7, 0, 0}, {0, 0, 0}, {0, 0, 1}};
+
+    std::vector<std::vector<int>> result = multiplySparseMatrices(mat1, mat2);
+
+    std::cout << "Result:" << std::endl;
+    for (const auto& row : result) {
+        for (int value : row) {
+            std::cout << value << " ";
+        }
+        std::cout << std::endl;
+    }
+
+    return 0;
+}
+
+
+
+Input: mat1 = [[1,0,0],[-1,0,3]], mat2 = [[7,0,0],[0,0,0],[0,0,1]]
+Output: [[7,0,0],[-7,0,3]]
